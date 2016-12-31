@@ -4,10 +4,14 @@ import { Provider } from 'react-redux';
 import setup from './setup';
 import App from './app';
 
+import layout from './layout';
 import servers from './servers';
+import files from './files';
 
 const parameters = [
+  layout,
   servers,
+  files,
 ];
 
 class Player extends Component {

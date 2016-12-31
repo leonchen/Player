@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
 
-import Servers from './servers/Servers';
+import Layout from './layout/Layout';
 
 class App extends React.Component {
   static propTypes = {
@@ -21,7 +21,7 @@ class App extends React.Component {
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <Servers />
+        <Layout />
       </View>
     );
   }

@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import {
   ActivityIndicator,
   Text,
-  TextInput,
   TouchableWithoutFeedback,
   ScrollView,
   StyleSheet,
@@ -12,7 +11,6 @@ import {
 } from 'react-native';
 
 import * as actions from './actions';
-import * as layoutActions from '../layout/actions';
 
 const styles = StyleSheet.create({
   container: {
@@ -78,53 +76,43 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
   return {
-    servers: state.getIn(['servers', 'servers']).toJS(),
-    loading: state.getIn(['servers', 'loading']),
-    showForm: state.getIn(['servers', 'showForm']),
+    paths: state.getIn(['files', 'paths']).toJS(),
+    files: state.getIn(['files', 'files']).toJS(),
+    loading: state.getIn(['files', 'loading']),
   };
 }
 
-class Servers extends React.Component {
+class Files extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.func,
-    servers: React.PropTypes.array,
+    server: React.PropTypes.string,
+    paths: React.PropTypes.array,
+    files: React.PropTypes.array,
     loading: React.PropTypes.bool,
-    showForm: React.PropTypes.bool,
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      newServerURL: '',
-    };
   }
 
   componentWillMount() {
-    this.props.dispatch(actions.loadServers());
+    this.props.dispatch(actions.listPath(this.props.server, []));
   }
 
-  setNewServerURL = (e) => {
-    this.setState({ newServerURL: e.nativeEvent.text });
+  openFile(file) {
+    const { paths } = this.props;
+    if (file.type === 'dir') {
+      paths.push(file.name);
+      this.props.dispatch(actions.listPath(this.props.server, paths));
+    }
   }
 
-  showAddServerForm = () => {
-    this.props.dispatch(actions.showForm());
+  upperLevel = () => {
+    const { paths } = this.props;
+    paths.pop();
+    this.props.dispatch(actions.listPath(this.props.server, paths));
   }
 
-  addServer = () => {
-    const server = this.state.newServerURL;
-    this.props.dispatch(actions.addServer(server));
-  }
-
-  connectServer = (server) => {
-    this.props.dispatch(layoutActions.layout('files', { server, paths: [] }));
-  }
-
-  renderServer = (server) => (
-    <TouchableWithoutFeedback key={server} onPress={() => this.connectServer(server)}>
+  renderFile = (file) => (
+    <TouchableWithoutFeedback key={file.name} onPress={() => this.openFile(file)}>
       <View style={styles.server}>
-        <Text>{server}</Text>
+        <Text>{file.name}</Text>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -133,7 +121,7 @@ class Servers extends React.Component {
     if (this.props.loading) return null;
     return (
       <ScrollView>
-        {this.props.servers.map(this.renderServer)}
+        {this.props.files.map(this.renderFile)}
       </ScrollView>
     );
   }
@@ -149,10 +137,14 @@ class Servers extends React.Component {
   }
 
   renderServers() {
+  }
+
+  render() {
     return (
       <View style={styles.container}>
         <View style={styles.menu}>
-          <Text style={styles.addServerButton} onPress={this.showAddServerForm}>+</Text>
+          <Text>{this.props.paths.length}</Text>
+          <Text style={styles.upperLevelButton} onPress={this.upperLevel}>back</Text>
         </View>
         <View style={styles.list}>
           {this.renderList()}
@@ -161,30 +153,6 @@ class Servers extends React.Component {
       </View>
     );
   }
-
-  renderForm() {
-    return (
-      <View style={styles.container}>
-        <View style={styles.labelContainer}>
-          <Text>Server URL</Text>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            autoFocus
-            style={styles.urlInput}
-            placeholder="smb/ftp url"
-            onChange={this.setNewServerURL}
-            onEndEditing={this.addServer}
-          />
-        </View>
-      </View>
-    );
-  }
-
-  render() {
-    if (this.props.showForm) return this.renderForm();
-    return this.renderServers();
-  }
 }
 
-export default connect(mapStateToProps)(Servers);
+export default connect(mapStateToProps)(Files);

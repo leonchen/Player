@@ -1,4 +1,4 @@
 import reducer from './reducer';
-import sagas from './sagas';
+import sagas from './saga';
 
 export default { reducer, sagas };
